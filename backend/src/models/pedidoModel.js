@@ -1,41 +1,44 @@
-let pedidos = [];
-let proximoId = 1;
+import { db } from '../db.js';
+
+const COLUNAS = `id, cliente_id AS clienteId,
+  data_criacao AS dataCriacao, status, total`;
 
 export const pedidoModel = {
   listar() {
-    return pedidos;
+    return db.prepare(`SELECT ${COLUNAS} FROM pedidos ORDER BY id`).all();
   },
 
   listarPorCliente(clienteId) {
-    return pedidos.filter((p) => p.clienteId === clienteId);
+    return db
+      .prepare(`SELECT ${COLUNAS} FROM pedidos WHERE cliente_id = ? ORDER BY id`)
+      .all(clienteId);
   },
 
   buscarPorId(id) {
-    return pedidos.find((p) => p.id === id) ?? null;
+    return db
+      .prepare(`SELECT ${COLUNAS} FROM pedidos WHERE id = ?`)
+      .get(id) ?? null;
   },
 
   inserir({ clienteId, total, status }) {
-    const novo = {
-      id: proximoId++,
-      clienteId: Number(clienteId),
-      dataCriacao: new Date().toISOString(),
-      status: status ?? 'aberto',
-      total: Number(total),
-    };
-    pedidos.push(novo);
-    return novo;
+    const r = db
+      .prepare(`INSERT INTO pedidos (cliente_id, data_criacao, status, total)
+                VALUES (?, ?, ?, ?)`)
+      .run(Number(clienteId), new Date().toISOString(), status ?? 'aberto', Number(total));
+    return this.buscarPorId(r.lastInsertRowid);
   },
 
   atualizar(id, dados) {
-    const i = pedidos.findIndex((p) => p.id === id);
-    if (i === -1) return null;
-    pedidos[i] = { ...pedidos[i], ...dados, id };
-    return pedidos[i];
+    const atual = this.buscarPorId(id);
+    if (!atual) return null;
+    const novo = { ...atual, ...dados };
+    db.prepare('UPDATE pedidos SET cliente_id = ?, status = ?, total = ? WHERE id = ?')
+      .run(Number(novo.clienteId), novo.status, Number(novo.total), id);
+    return this.buscarPorId(id);
   },
 
   remover(id) {
-    const antes = pedidos.length;
-    pedidos = pedidos.filter((p) => p.id !== id);
-    return pedidos.length < antes;
+    const r = db.prepare('DELETE FROM pedidos WHERE id = ?').run(id);
+    return r.changes > 0;
   },
 };
