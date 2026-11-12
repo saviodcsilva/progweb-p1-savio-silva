@@ -1,4 +1,5 @@
 import { clienteModel } from '../models/clienteModel.js';
+import { contaModel } from '../models/contaModel.js';
 import { erro } from '../utils/erro.js';
 
 export const clienteService = {
@@ -25,6 +26,9 @@ export const clienteService = {
   },
 
   remover(id) {
+    if (contaModel.listarPorCliente(id).length > 0) {
+      throw erro(409, 'Cliente possui contas. Remova as contas primeiro.');
+    }
     const removido = clienteModel.remover(id);
     if (!removido) throw erro(404, 'Cliente não encontrado');
   },
