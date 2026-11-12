@@ -1,4 +1,5 @@
 import { clienteModel } from '../models/clienteModel.js';
+import { pedidoModel } from '../models/pedidoModel.js';
 import { erro } from '../utils/erro.js';
 
 export const clienteService = {
@@ -29,6 +30,9 @@ export const clienteService = {
   },
 
   remover(id) {
+    if (pedidoModel.listarPorCliente(id).length > 0) {
+      throw erro(409, 'Cliente possui pedidos registrados. Remova os pedidos primeiro.');
+    }
     const removido = clienteModel.remover(id);
     if (!removido) throw erro(404, 'Cliente não encontrado');
   },
