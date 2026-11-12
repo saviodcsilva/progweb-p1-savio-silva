@@ -1,4 +1,4 @@
-// s1/main.js - v4: polimorfismo
+// s1/main.js - v5: polimorfismo + composição
 import { Conta } from "./Conta.js";
 import { ContaCorrente } from "./ContaCorrente.js";
 import { ContaPoupanca } from "./ContaPoupanca.js";
@@ -19,6 +19,7 @@ function fecharMes(listaDeContas) {
 }
 
 fecharMes(contas);
+console.log(contas[0].extrato);
 
 try {
   new Conta("0003", "Carla Dias");

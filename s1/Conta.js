@@ -1,7 +1,10 @@
-// s1/Conta.js - v4: polimorfismo e classe abstrata
+// s1/Conta.js - v5: composição com Extrato
+import { Extrato } from "./Extrato.js";
+
 export class Conta {
   #saldo = 0;
   #titular;
+  #extrato = new Extrato();
 
   constructor(numero, titular) {
     if (new.target === Conta) {
@@ -26,9 +29,14 @@ export class Conta {
     this.#titular = nome.trim();
   }
 
+  get extrato() {
+    return this.#extrato.listar();
+  }
+
   depositar(valor) {
     if (!(valor > 0)) throw new Error("Depósito deve ser positivo");
     this.#saldo += valor;
+    this.#extrato.registrar("depósito", valor);
   }
 
   saldoDisponivel() {
@@ -39,6 +47,7 @@ export class Conta {
     if (!(valor > 0)) throw new Error("Saque deve ser positivo");
     if (valor > this.saldoDisponivel()) throw new Error("Saldo insuficiente");
     this.#saldo -= valor;
+    this.#extrato.registrar("saque", valor);
   }
 
   tarifaMensal() {
