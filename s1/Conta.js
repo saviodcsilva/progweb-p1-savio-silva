@@ -1,4 +1,4 @@
-// s1/Conta.js - v2: encapsulamento
+// s1/Conta.js - v3: herança
 export class Conta {
   #saldo = 0;
   #titular;
@@ -28,9 +28,13 @@ export class Conta {
     this.#saldo += valor;
   }
 
+  saldoDisponivel() {
+    return this.#saldo;
+  }
+
   sacar(valor) {
     if (!(valor > 0)) throw new Error("Saque deve ser positivo");
-    if (valor > this.#saldo) throw new Error("Saldo insuficiente");
+    if (valor > this.saldoDisponivel()) throw new Error("Saldo insuficiente");
     this.#saldo -= valor;
   }
 }
